@@ -1,11 +1,38 @@
-const NUM_GUESSES = 6
+import { ActionType, StateType } from "./context"
 
-function reducer(state: any, action: any) {
-	const { guesses, currentGuess, calculation } = state
-
-	if (guesses.includes(calculation) || guesses[NUM_GUESSES - 1] !== "") {
-		return
+export const gameReducer = (state: StateType, action: ActionType) => {
+	switch (action.type) {
+		case "setGuesses":
+			return {
+				...state,
+				guesses: action.value,
+			}
+		case "setCurrentGuess":
+			return {
+				...state,
+				currentGuess: action.value,
+			}
+		case "setSolution":
+			return {
+				...state,
+				solution: action.value,
+			}
+		case "setCalculation":
+			return {
+				...state,
+				calculation: action.value,
+			}
+		case "setHasWon":
+			return {
+				...state,
+				hasWon: action.value,
+			}
+		case "setHandleControlClick":
+			return {
+				...state,
+				handleControlClick: action.value,
+			}
+		default:
+			return state
 	}
 }
-
-export default reducer

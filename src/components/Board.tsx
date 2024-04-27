@@ -35,22 +35,8 @@ const Board: React.FC = () => {
 	useEffect(() => {
 		if (solution === null || calculation === null) return
 
-		const updateBoard = (
-			keyboardEvent: KeyboardEvent | null,
-			mouseEvent: React.MouseEvent<HTMLButtonElement> | null,
-		) => {
-			// To refactor and put it in Store
-			let value
-			if (keyboardEvent != null) {
-				value = keyboardEvent.key
-			} else if (mouseEvent != null) {
-				value = mouseEvent.currentTarget.textContent || ""
-				console.log(value)
-			} else {
-				return
-			}
-			// to refactor
-
+		// Function to handle input from keyboard or button click
+		const handleInput = (value: string) => {
 			setErrorMsg("")
 
 			// Game over if player has found the calculation or has already made NUM_GUESSES
@@ -73,21 +59,21 @@ const Board: React.FC = () => {
 					return
 				} else if (result === solution) {
 					console.log(calculation, currentGuess)
-					// const regex = /\d+|\+|\-|\*|\//g
-					const regex = /(\d+\.?\d*|\+|\*|\/|\(|\))/g
+					const regex = /\d+|\+|\-|\*|\//g
+					// const regex = /(\d+\.?\d*|\+|\*|\/|\(|\))/g
 
-					const calcMatches = calculation?.match(regex) // 1+5*15
+					const calcMatches = calculation.match(regex) ?? [] // 1+5*15
 					const curGuessmatches = currentGuess.match(regex) ?? [] // 1+3*25
-
+					const arr1 = [...calcMatches].sort()
+					const arr2 = [...curGuessmatches].sort()
 					console.log(calcMatches, curGuessmatches)
 
 					if (calculation === currentGuess) {
 						dispatch({ type: "setHasWon", value: true })
-					} else if (result !== solution) {
+					} else if (arr1.every((v: string, i: number) => v === arr2[i])) {
 						console.log(`Good but Different to ${solution}`)
-						setErrorMsg(`Good but diff`)
-						// setTimeout(() => setErrorMsg(false), 3000)
-						return
+						dispatch({ type: "setCalculation", value: currentGuess })
+						dispatch({ type: "setHasWon", value: true })
 					}
 				}
 
@@ -98,8 +84,7 @@ const Board: React.FC = () => {
 				dispatch({ type: "setCurrentGuess", value: "" })
 			} else if (
 				currentGuess.length < CALC_LENGTH &&
-				((keyboardEvent != null && isNumberOrOperator(charCode, value)) ||
-					(mouseEvent != null && value))
+				isNumberOrOperator(charCode, value)
 			) {
 				console.log("=>", currentGuess + value.toLowerCase())
 				dispatch({
@@ -109,18 +94,22 @@ const Board: React.FC = () => {
 			}
 		}
 
-		const onPressKey = (event: KeyboardEvent) => {
-			updateBoard(event, null)
+		// Keyboard event handler
+		const onKeyPress = (event: KeyboardEvent) => {
+			handleInput(event.key)
 		}
-		const handleControlClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-			updateBoard(null, event)
-		}
-		dispatch({ type: "setHandleControlClick", value: handleControlClick })
 
-		window.addEventListener("keydown", onPressKey)
+		// Mouse event handler for game button clicks
+		const onGameButtonClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+			handleInput(event.currentTarget.textContent || "")
+		}
+
+		// Setting up event listener for keyboard events
+		window.addEventListener("keydown", onKeyPress)
+		dispatch({ type: "setHandleControlClick", value: onGameButtonClick })
 
 		return () => {
-			window.removeEventListener("keydown", onPressKey)
+			window.removeEventListener("keydown", onKeyPress)
 		}
 	}, [guesses, solution, currentGuess, calculation, dispatch])
 

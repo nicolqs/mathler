@@ -2,7 +2,7 @@ import React, { createContext, useContext } from "react"
 
 const NUM_GUESSES = 6
 
-type StateType = {
+export interface StateType {
 	guesses: string[]
 	currentGuess: string
 	solution: number | null
@@ -11,7 +11,7 @@ type StateType = {
 	handleControlClick?: (event: React.MouseEvent<HTMLButtonElement>) => void
 }
 
-type ActionType =
+export type ActionType =
 	| { type: "setGuesses"; value: string[] }
 	| { type: "setCurrentGuess"; value: string }
 	| { type: "setSolution"; value: number }
@@ -37,43 +37,5 @@ export const GameContext = createContext<{
 	state: initState,
 	dispatch: () => undefined,
 })
-
-// Reducer function
-export const gameReducer = (state: StateType, action: ActionType) => {
-	switch (action.type) {
-		case "setGuesses":
-			return {
-				...state,
-				guesses: action.value,
-			}
-		case "setCurrentGuess":
-			return {
-				...state,
-				currentGuess: action.value,
-			}
-		case "setSolution":
-			return {
-				...state,
-				solution: action.value,
-			}
-		case "setCalculation":
-			return {
-				...state,
-				calculation: action.value,
-			}
-		case "setHasWon":
-			return {
-				...state,
-				hasWon: action.value,
-			}
-		case "setHandleControlClick":
-			return {
-				...state,
-				handleControlClick: action.value,
-			}
-		default:
-			return state
-	}
-}
 
 export const useGame = () => useContext(GameContext)

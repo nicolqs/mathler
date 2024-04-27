@@ -1,6 +1,7 @@
 import { Transition } from "@tailwindui/react"
 import { useEffect, useReducer, useState } from "react"
-import { GameContext, gameReducer, initState } from "../store/context"
+import { GameContext, initState } from "../store/context"
+import { gameReducer } from "../store/reducer"
 import Board from "./Board"
 import Instructions from "./Instructions"
 
