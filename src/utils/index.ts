@@ -1,11 +1,27 @@
+export const NUM_GUESSES = 6
+export const CALC_LENGTH = 6
+
 export const numbers = Array.from({ length: 10 }, (_, i) => i.toString())
 export const operators = ["+", "-", "*", "/"]
+export const authorizedControls = ["enter", "delete", "backspace"]
 
-export const isNumberOrOperator = (charCode: number, key: string) => {
+/**
+ * Check if current tile value is:
+ * - a number
+ * - an math operator
+ * - an authorized control
+ */
+export const isValidTileValue = (value: string) => {
+	const charCode = value.charCodeAt(0)
+	return isNumberOrOperator(charCode) || authorizedControls.includes(value)
+}
+
+/**
+ * Check if a charCode number is matching correct ASCII values
+ */
+export const isNumberOrOperator = (charCode: number) => {
 	return (
-		(key.length === 1 &&
-			charCode >= "0".charCodeAt(0) &&
-			charCode <= "9".charCodeAt(0)) ||
+		(charCode >= "0".charCodeAt(0) && charCode <= "9".charCodeAt(0)) ||
 		charCode === "+".charCodeAt(0) ||
 		charCode === "-".charCodeAt(0) ||
 		charCode === "*".charCodeAt(0) ||
@@ -13,6 +29,9 @@ export const isNumberOrOperator = (charCode: number, key: string) => {
 	)
 }
 
+/**
+ * Helper function to style each cell corresponding to their state
+ */
 export function getCellStyle(
 	char: string,
 	index: number,

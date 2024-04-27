@@ -4,15 +4,6 @@ import { describe, expect, it, vi } from "vitest"
 
 import ControlButton from "./ControlButton"
 
-// Mock the useGame hook
-vi.mock("../store/context", () => ({
-	useGame: vi.fn(() => ({
-		state: {
-			handleControlClick: vi.fn(),
-		},
-	})),
-}))
-
 describe("ControlButton", () => {
 	it("renders correctly with required props", () => {
 		render(<ControlButton text="Click me" />)
@@ -26,13 +17,14 @@ describe("ControlButton", () => {
 
 		// vi.mocked(useGame).mockReturnValue({
 		// 	state: {
-		// 		handleControlClick: mockHandleControlClick,
+		// 		currentTileValue: "Click me",
 		// 	},
 		// })
 
 		render(<ControlButton text="Click me" />)
 		const button = screen.getByRole("button", { name: "Click me" })
 		fireEvent.click(button)
+		expect(mockHandleControlClick).toHaveBeenCalledTimes(1)
 		expect(mockHandleControlClick).toHaveBeenCalledTimes(1)
 	})
 

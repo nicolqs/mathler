@@ -27,10 +27,10 @@ export const gameReducer = (state: StateType, action: ActionType) => {
 				...state,
 				hasWon: action.value,
 			}
-		case "setHandleControlClick":
+		case "setCurrentTileValue":
 			return {
 				...state,
-				handleControlClick: action.value,
+				currentTileValue: action.value,
 			}
 		default:
 			return state
