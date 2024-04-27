@@ -3,7 +3,8 @@ import { evaluate } from "mathjs"
 import React, { useEffect, useState } from "react"
 import { twMerge } from "tailwind-merge"
 import puzzles from "../data/puzzles"
-import { isNumberOrOperator } from "../utils/utils"
+import { useGame } from "../store/context"
+import { isNumberOrOperator } from "../utils"
 import Controls from "./Controls"
 import GuessLine from "./GuessLine"
 
@@ -16,114 +17,128 @@ export interface Puzzle {
 }
 
 const Board: React.FC = () => {
-	// const [tasks, dispatch] = useReducer(tasksReducer, initialTasks)
+	const { state, dispatch } = useGame()
+	const { guesses, currentGuess, solution, calculation, hasWon } = state
 
-	const [guesses, setGuesses] = useState(Array(NUM_GUESSES).fill(""))
-	const [currentGuess, setCurrentGuess] = useState<string>("")
-	const [solution, setSolution] = useState<number | null>(null)
-	const [calculation, setCalculation] = useState<string | null>(null)
-	const [hasWon, setHasWon] = useState<boolean>(false)
-	const [canShow, setCanShow] = useState<boolean>(false)
-	const [showWarningMsg, setShowWarningMsg] = useState<boolean>(false)
+	const [showTransition, setShowTransition] = useState<boolean>(false)
+	const [errorMsg, setErrorMsg] = useState<string>("")
 
 	// Pick the daily Puzzle
 	useEffect(() => {
 		const dailyPuzzle = puzzles[0] //Math.floor(Math.random() * puzzles.length)]
-		setSolution(dailyPuzzle.solution)
-		setCalculation(dailyPuzzle.calculation)
-		setTimeout(() => setCanShow(true), 800)
-	}, [])
+		dispatch({ type: "setSolution", value: dailyPuzzle.solution })
+		dispatch({ type: "setCalculation", value: dailyPuzzle.calculation })
+
+		setTimeout(() => setShowTransition(true), 800)
+	}, [dispatch])
 
 	useEffect(() => {
-		if (solution === null) return
+		if (solution === null || calculation === null) return
 
-		const updateBoard = (keyboardEvent: KeyboardEvent) => {
-			// setShowWarningMsg(false)
-
-			// Game over if player has found the calculation or has already made NUM_GUESSES
-			if (guesses.includes(calculation) || guesses[NUM_GUESSES - 1] !== "") {
+		const updateBoard = (
+			keyboardEvent: KeyboardEvent | null,
+			mouseEvent: React.MouseEvent<HTMLButtonElement> | null,
+		) => {
+			// To refactor and put it in Store
+			let value
+			if (keyboardEvent != null) {
+				value = keyboardEvent.key
+			} else if (mouseEvent != null) {
+				value = mouseEvent.currentTarget.textContent || ""
+				console.log(value)
+			} else {
 				return
 			}
+			// to refactor
 
-			const charCode = keyboardEvent.key.toLowerCase().charCodeAt(0)
-			setCurrentGuess((prevGuess) => {
-				if (keyboardEvent.key == "Backspace") {
-					return prevGuess.slice(0, -1)
-				} else if (
-					keyboardEvent.key == "Enter" &&
-					prevGuess.length === CALC_LENGTH
-				) {
-					const result = evaluate(prevGuess)
-					if (result != solution) {
-						console.log(`Wrong calc ! Your guess is not equal to ${solution}`)
-						setShowWarningMsg(true)
-						return prevGuess
-					} else if (result == solution) {
-						console.log(calculation, prevGuess)
-						// const regex = /\d+|\+|\-|\*|\//g
-						const regex = /(\d+\.?\d*|\+|\-|\*|\/|\(|\))/g
+			setErrorMsg("")
 
-						const calcMatches = calculation?.match(regex) // 1+5*15
-						const curGuessmatches = prevGuess.match(regex) ?? [] // 1+3*25
+			// Game over if player has found the calculation or has already made NUM_GUESSES
+			if (guesses.includes(calculation)) {
+				return
+			}
+			if (guesses[NUM_GUESSES - 1] !== "") {
+				setErrorMsg("You lost! Try again")
+			}
 
-						console.log(calcMatches, curGuessmatches)
+			const charCode = value.toLowerCase().charCodeAt(0)
 
-						if (calculation === prevGuess) {
-							setHasWon(true)
-						} else if (result !== solution) {
-							console.log(`Good but Different to ${solution}`)
-							setShowWarningMsg(true)
-							// setTimeout(() => setShowWarningMsg(false), 3000)
-							return prevGuess
-						}
+			if (["Backspace", "Delete"].includes(value)) {
+				dispatch({ type: "setCurrentGuess", value: currentGuess.slice(0, -1) })
+			} else if (value === "Enter" && currentGuess.length === CALC_LENGTH) {
+				const result = evaluate(currentGuess)
+				if (result !== solution) {
+					console.log(`Wrong calc ! Your guess is not equal to ${solution}`)
+					setErrorMsg(`Your guess is not equal to ${solution}`)
+					return
+				} else if (result === solution) {
+					console.log(calculation, currentGuess)
+					// const regex = /\d+|\+|\-|\*|\//g
+					const regex = /(\d+\.?\d*|\+|\*|\/|\(|\))/g
+
+					const calcMatches = calculation?.match(regex) // 1+5*15
+					const curGuessmatches = currentGuess.match(regex) ?? [] // 1+3*25
+
+					console.log(calcMatches, curGuessmatches)
+
+					if (calculation === currentGuess) {
+						dispatch({ type: "setHasWon", value: true })
+					} else if (result !== solution) {
+						console.log(`Good but Different to ${solution}`)
+						setErrorMsg(`Good but diff`)
+						// setTimeout(() => setErrorMsg(false), 3000)
+						return
 					}
-
-					const currentGuessIndex = guesses.findIndex((guess) => guess === "")
-					const guessesClone = [...guesses]
-					guessesClone[currentGuessIndex] = prevGuess
-					setGuesses(guessesClone)
-					return ""
-				} else if (
-					prevGuess.length < CALC_LENGTH &&
-					isNumberOrOperator(charCode, keyboardEvent.key)
-				) {
-					return prevGuess + keyboardEvent.key.toLowerCase()
 				}
-				return prevGuess
-			})
-		}
 
-		const onClickControlButton = (event: MouseEvent) => {
-			console.log("clicked!", event?.target)
+				const currentGuessIndex = guesses.findIndex((guess) => guess === "")
+				const guessesClone = [...guesses]
+				guessesClone[currentGuessIndex] = currentGuess
+				dispatch({ type: "setGuesses", value: guessesClone })
+				dispatch({ type: "setCurrentGuess", value: "" })
+			} else if (
+				currentGuess.length < CALC_LENGTH &&
+				((keyboardEvent != null && isNumberOrOperator(charCode, value)) ||
+					(mouseEvent != null && value))
+			) {
+				console.log("=>", currentGuess + value.toLowerCase())
+				dispatch({
+					type: "setCurrentGuess",
+					value: currentGuess + value.toLowerCase(),
+				})
+			}
 		}
 
 		const onPressKey = (event: KeyboardEvent) => {
-			updateBoard(event)
+			updateBoard(event, null)
 		}
+		const handleControlClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+			updateBoard(null, event)
+		}
+		dispatch({ type: "setHandleControlClick", value: handleControlClick })
 
 		window.addEventListener("keydown", onPressKey)
 
 		return () => {
 			window.removeEventListener("keydown", onPressKey)
 		}
-	}, [guesses, solution])
+	}, [guesses, solution, currentGuess, calculation, dispatch])
 
 	const currentGuessIndex = guesses.findIndex((guess) => guess === "")
 
 	if (calculation == null) return null
 
+	const getGuess = (guess: string, i: number) =>
+		(i === currentGuessIndex ? currentGuess : guess ?? "").padEnd(CALC_LENGTH)
+
 	return (
-		// <GameContext.Provider value={tasks}>
 		<div className="flex flex-col items-center gap-1">
 			<div className="">Find the hidden calculation that equals</div>
 			<Transition
-				show={canShow}
+				show={showTransition}
 				enter="transition-opacity duration-300"
 				enterFrom="opacity-0"
 				enterTo="opacity-100"
-				leave="transition-opacity duration-150"
-				leaveFrom="opacity-100"
-				leaveTo="opacity-0"
 			>
 				<div className="text-3xl animate-pulse font-extrabold text-transparent bg-clip-text bg-gradient-to-r to-emerald-600 from-sky-400 mb-3">
 					{solution}
@@ -133,29 +148,23 @@ const Board: React.FC = () => {
 				return (
 					<GuessLine
 						key={i}
-						guess={(i === currentGuessIndex
-							? currentGuess
-							: guess ?? ""
-						).padEnd(CALC_LENGTH)}
+						guess={getGuess(guess, i)}
 						calculation={calculation}
 						isFinal={currentGuessIndex > i || currentGuessIndex === -1}
 						winningRow={i === currentGuessIndex - 1 && hasWon}
 					/>
 				)
 			})}
-			<Controls />
 			<div
 				className={twMerge(
-					"flex flex-row text-md md:text-2xl text-red-600 text-center mt-4",
-					showWarningMsg ? "block" : "hidden",
+					"text-md md:text-2xl font-bold text-center h-10 pt-2 text-red-600 transition-opacity duration-300 ease-linear",
+					errorMsg ? "opacity-100" : "opacity-0",
 				)}
 			>
-				<p>Oh, snapp!</p>
-				<p>{`Your guess is not equal to ${solution}`}</p>
-				<p>Try again!</p>
+				{errorMsg}
 			</div>
+			<Controls />
 		</div>
-		// </GameContext.Provider>
 	)
 }
 

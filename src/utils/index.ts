@@ -1,3 +1,6 @@
+export const numbers = Array.from({ length: 10 }, (_, i) => i.toString())
+export const operators = ["+", "-", "*", "/"]
+
 export const isNumberOrOperator = (charCode: number, key: string) => {
 	return (
 		(key.length === 1 &&

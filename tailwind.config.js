@@ -16,7 +16,7 @@ module.exports = {
 				},
 			},
 			animation: {
-				"flip-horizontally": "flip 0.5s ease-in-out forwards",
+				"flip-horizontally": "flip 2s ease-in-out forwards",
 				wiggle: "wiggle 1s ease-in-out infinite",
 			},
 		},

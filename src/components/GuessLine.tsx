@@ -1,6 +1,6 @@
 import { memo } from "react"
 import { twMerge } from "tailwind-merge"
-import { getCellStyle } from "../utils/utils"
+import { getCellStyle } from "../utils"
 
 interface GuessLineProps {
 	guess: string
@@ -21,7 +21,9 @@ const GuessLine: React.FC<GuessLineProps> = ({
 		<div
 			className={twMerge(
 				"flex justify-center gap-1 ",
-				winningRow ? "border-green-500 border-2 rounded animate-pulse p-2" : 0,
+				winningRow
+					? "border-green-500 transition-border ease-linear duration-900 border-2 rounded animate-pulse p-2"
+					: 0,
 			)}
 		>
 			{guess.split("").map((char: string, i: number) => {
@@ -36,7 +38,7 @@ const GuessLine: React.FC<GuessLineProps> = ({
 					<div
 						key={i}
 						className={twMerge(
-							"w-14 h-14 border-solid  border-2 flex items-center justify-center font-bold rounded",
+							"w-14 h-14 border-solid border-2 flex items-center justify-center font-bold rounded",
 							cellStyle,
 							animate,
 						)}
