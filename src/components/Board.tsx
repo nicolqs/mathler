@@ -1,15 +1,10 @@
 import { Transition } from "@tailwindui/react"
-import { evaluate } from "mathjs"
 import React, { useEffect, useState } from "react"
 import { twMerge } from "tailwind-merge"
 import puzzles from "../data/puzzles"
+import useBoardActions from "../hooks/useBoardActions"
 import { useGame } from "../store/context"
-import {
-	CALC_LENGTH,
-	NUM_GUESSES,
-	isNumberOrOperator,
-	isValidTileValue,
-} from "../utils"
+import { NUM_GUESSES, getGuess, isValidTileValue } from "../utils"
 import Controls from "./Controls"
 import GuessLine from "./GuessLine"
 
@@ -20,6 +15,7 @@ export interface Puzzle {
 
 const Board: React.FC = () => {
 	const { state, dispatch } = useGame()
+	const { appendValueIfNeeded, processEnterKey } = useBoardActions()
 	const {
 		guesses,
 		currentGuess,
@@ -42,7 +38,7 @@ const Board: React.FC = () => {
 	}, [dispatch])
 
 	/**
-	 * Handle the backspace / delete action
+	 * Add listener for keydown event to call onKeyPress()
 	 */
 	useEffect(() => {
 		const onKeyPress = (event: KeyboardEvent) => {
@@ -69,6 +65,9 @@ const Board: React.FC = () => {
 		}
 	}, [currentTileValue, currentGuess, dispatch])
 
+	/**
+	 *
+	 */
 	useEffect(() => {
 		if (calculation === null) return
 
@@ -83,51 +82,31 @@ const Board: React.FC = () => {
 			return
 		}
 
-		if (currentTileValue === "enter" && currentGuess.length === CALC_LENGTH) {
-			const result = evaluate(currentGuess)
-			if (result !== solution) {
+		if (currentTileValue === "enter") {
+			const currentGuessStatus = processEnterKey()
+			if (!currentGuessStatus) {
 				setErrorMsg(`Your guess is not equal to ${solution}`)
-				return
-			} else if (result === solution) {
-				const regex = /\d+|\+|\*|\//g
-
-				const calcMatches = calculation.match(regex) ?? [] // 1+5*15
-				const curGuessmatches = currentGuess.match(regex) ?? [] // 1+3*25
-				const arr1 = [...calcMatches].sort()
-				const arr2 = [...curGuessmatches].sort()
-
-				if (calculation === currentGuess) {
-					dispatch({ type: "setHasWon", value: true })
-				} else if (arr1.every((v: string, i: number) => v === arr2[i])) {
-					console.log(`Good but Different to ${solution}`)
-					dispatch({ type: "setCalculation", value: currentGuess })
-					dispatch({ type: "setHasWon", value: true })
-				}
 			}
-
-			const currentGuessIndex = guesses.findIndex((guess) => guess === "")
-			const guessesClone = [...guesses]
-			guessesClone[currentGuessIndex] = currentGuess
-			dispatch({ type: "setGuesses", value: guessesClone })
-			dispatch({ type: "setCurrentGuess", value: "" })
-		} else if (
-			currentGuess.length < CALC_LENGTH &&
-			isNumberOrOperator(currentTileValue.charCodeAt(0))
-		) {
-			dispatch({
-				type: "setCurrentGuess",
-				value: currentGuess + currentTileValue,
-			})
+		} else {
+			// Appends value if it's a valid character and under length limit
+			appendValueIfNeeded(currentTileValue, currentGuess)
 		}
+
 		dispatch({ type: "setCurrentTileValue", value: "" })
-	}, [guesses, solution, calculation, currentTileValue, currentGuess, dispatch])
+	}, [
+		guesses,
+		solution,
+		calculation,
+		currentTileValue,
+		currentGuess,
+		dispatch,
+		processEnterKey,
+		appendValueIfNeeded,
+	])
 
 	const currentGuessIndex = guesses.findIndex((guess) => guess === "")
 
 	if (calculation == null) return null
-
-	const getGuess = (guess: string, i: number) =>
-		(i === currentGuessIndex ? currentGuess : guess ?? "").padEnd(CALC_LENGTH)
 
 	return (
 		<div className="flex flex-col items-center gap-1">
@@ -146,7 +125,7 @@ const Board: React.FC = () => {
 				return (
 					<GuessLine
 						key={i}
-						guess={getGuess(guess, i)}
+						guess={getGuess(guess, i, currentGuessIndex, currentGuess)}
 						calculation={calculation}
 						isFinal={currentGuessIndex > i || currentGuessIndex === -1}
 						winningRow={i === currentGuessIndex - 1 && hasWon}

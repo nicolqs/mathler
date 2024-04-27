@@ -16,15 +16,15 @@ const Instructions: React.FC = () => {
 			{showModal && (
 				<>
 					<div className="justify-center items-center flex overflow-x-hidden overflow-y-auto fixed inset-0 z-50 outline-none focus:outline-none">
-						<div className="relative w-auto my-6 mx-auto max-w-3xl">
+						<div className="w-auto my-6 mx-auto max-w-3xl">
 							<div className="flex flex-col bg-white border-4 border-gray-100 rounded-xl min-w-[23em] max-w-xl p-4">
 								{/*body*/}
 								<div className="relative pt-3 px-6 flex-auto">
 									<button
-										className="relative top-0 right-0 p-1 ml-auto bg-transparent border-0 text-black  text-3xl leading-none font-semibold outline-none focus:outline-none"
+										className="absolute top-0 right-3 p-1 ml-auto bg-transparent border-0 text-black  text-3xl leading-none font-semibold outline-none focus:outline-none"
 										onClick={() => setShowModal(false)}
 									>
-										<span className="bg-transparent text-black h-6 w-6 text-2xl block outline-none focus:outline-none">
+										<span className="bg-transparent text-black h-6 w-6 text-3xl block outline-none focus:outline-none">
 											×
 										</span>
 									</button>

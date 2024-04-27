@@ -47,3 +47,24 @@ export function getCellStyle(
 		return `bg-gray-500 ${animation}`
 	}
 }
+
+/**
+ * Helper to get the correct Guess at current guess index
+ */
+export const getGuess = (
+	guess: string,
+	i: number,
+	currentGuessIndex: number,
+	currentGuess: string,
+) => (i === currentGuessIndex ? currentGuess : guess ?? "").padEnd(CALC_LENGTH)
+
+/**
+ * Check if arrays equal
+ * => in roder to accept cumulative solutions (e.g. 1+5*15 === 15*5+1)
+ *
+ * example:
+ * ['1', '+', '5', '*', '15'] (5) ['5', '*', '15', '+', '1']
+ */
+export const areArraysEqual = (arr1: string[], arr2: string[]) =>
+	arr1.length === arr2.length &&
+	arr1.every((value, index) => value === arr2[index])
