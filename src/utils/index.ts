@@ -5,6 +5,12 @@ export const numbers = Array.from({ length: 10 }, (_, i) => i.toString())
 export const operators = ["+", "-", "*", "/"]
 export const authorizedControls = ["enter", "delete", "backspace"]
 
+export enum Status {
+	Correct = "correct",
+	Incorrect = "incorrect",
+	Misplaced = "misplaced",
+}
+
 /**
  * Check if current tile value is:
  * - a number
@@ -43,9 +49,8 @@ export function getCellStyle(
 		return `bg-green-500 ${animation}`
 	} else if (calculation.includes(char)) {
 		return `bg-yellow-500 ${animation}`
-	} else {
-		return `bg-gray-500 ${animation}`
 	}
+	return `bg-gray-500 ${animation}`
 }
 
 /**

@@ -73,14 +73,14 @@ const Board: React.FC = () => {
 
 		// Game over
 		if (guesses[NUM_GUESSES - 1] !== "") {
-			setErrorMsg("You lost! Try again")
+			setErrorMsg(`The solution was ${calculation}`)
 			return
 		}
 
 		if (currentTileValue === "enter") {
 			// Process game on Enter key
 			const currentGuessStatus = processEnterKey()
-			if (!currentGuessStatus) {
+			if (currentGuessStatus === false) {
 				setErrorMsg(`Your guess is not equal to ${solution}`)
 			}
 		} else {
@@ -108,7 +108,7 @@ const Board: React.FC = () => {
 	return (
 		<div className="flex flex-col items-center gap-1">
 			<div className="">Find the hidden calculation that equals</div>
-			<div className="text-3xl animate-pulse font-extrabold text-transparent bg-clip-text bg-gradient-to-r to-emerald-600 from-sky-400 mb-3">
+			<div className="text-3xl animate-pulse font-extrabold text-transparent bg-clip-text bg-gradient-to-r to-emerald-600 from-sky-400 mb-2">
 				{solution}
 			</div>
 			<Transition
@@ -117,7 +117,10 @@ const Board: React.FC = () => {
 				enterFrom="opacity-0 scale-90"
 				enterTo="opacity-100 scale-100"
 			>
-				<div className="text-green-600 font-bold text-2xl mb-4">
+				<div
+					className="text-green-600 font-bold text-2xl mb-4"
+					data-testid={"win-msg"}
+				>
 					🙌🏼 Congrats! You Won! 🙌🏼
 				</div>
 			</Transition>
@@ -129,6 +132,7 @@ const Board: React.FC = () => {
 						calculation={calculation}
 						isFinal={currentGuessIndex > i || currentGuessIndex === -1}
 						isWinningRow={i === currentGuessIndex - 1 && hasWon}
+						row={i}
 					/>
 				)
 			})}
@@ -137,6 +141,7 @@ const Board: React.FC = () => {
 					"text-md md:text-2xl font-bold text-center h-10 pt-2 text-red-600 transition-opacity duration-300 ease-linear",
 					errorMsg ? "opacity-100" : "opacity-0",
 				)}
+				data-testid={"error-msg"}
 			>
 				{errorMsg}
 			</div>

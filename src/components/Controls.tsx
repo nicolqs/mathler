@@ -6,7 +6,7 @@ const Controls: React.FC = () => {
 		<div className="flex flex-col gap-2">
 			<div className="flex justify-center">
 				{numbers.map((n, i) => (
-					<ControlButton key={i} text={n} className="bg-cyan-400 rounded-lg" />
+					<ControlButton key={i} text={n} className="rounded-lg" />
 				))}
 			</div>
 			<div className="flex justify-between">
@@ -15,7 +15,7 @@ const Controls: React.FC = () => {
 					<ControlButton
 						key={i}
 						text={operator}
-						className={"w-12 bg-cyan-400 rounded-lg"}
+						className={"w-12 rounded-lg"}
 					/>
 				))}
 				<ControlButton text={"Delete"} className={"w-16 "} />

@@ -1,108 +1,242 @@
 import "@testing-library/jest-dom"
-import { fireEvent, render, screen, waitFor } from "@testing-library/react"
-import { beforeEach, describe, expect, test } from "vitest"
+import { fireEvent, render, screen } from "@testing-library/react"
+import { beforeEach, describe, expect, it } from "vitest"
 import App from "./App"
 import ControlButton from "./components/ControlButton"
+import { CALC_LENGTH, NUM_GUESSES, numbers, operators } from "./utils"
 
 describe("Board", () => {
 	beforeEach(() => {})
 
-	test("shows title and text to be present", () => {
+	it("Tests keydown event updates board", async () => {
+		const key = "2"
 		render(<App />)
 
-		waitFor(() =>
-			expect(screen.getByRole("heading", { level: 1 })).toBeInTheDocument(),
+		const numberDiv = screen.getByTestId(`number-box-0-0`)
+		await fireEvent.keyDown(numberDiv, {
+			key,
+			code: key,
+			charCode: key.charCodeAt(0),
+		})
+		expect(numberDiv.textContent).toEqual(key)
+	})
+
+	it("Tests mouse click event updates board", async () => {
+		const key = "5"
+		render(<App />)
+
+		await fireEvent(
+			screen.getByTestId(`control-button-${key}`),
+			new MouseEvent("click", { bubbles: true }),
 		)
-		waitFor(() =>
-			expect(
-				screen.queryByText("Find the hidden calculation that equals"),
-			).toBeInTheDocument(),
+
+		const numberDiv = screen.getByTestId(`number-box-0-0`)
+		expect(numberDiv.textContent).toEqual(key)
+	})
+
+	it("Shows title and text", async () => {
+		render(<App />)
+
+		expect(screen.getByRole("heading", { level: 1 })).toBeInTheDocument()
+		expect(
+			screen.getByText("Find the hidden calculation that equals"),
+		).toBeInTheDocument()
+	})
+
+	it("Shows empty state", () => {
+		render(<App />)
+		expect(screen.queryByText("The solution was 1+5*15")).toBeNull()
+		expect(screen.queryByText("Congrats! You Won!")).toBeNull()
+	})
+
+	it("Checks all control buttons to be present", async () => {
+		render(<App />)
+
+		expect(screen.getByText("Enter")).toBeInTheDocument()
+		expect(screen.getByText("Delete")).toBeInTheDocument()
+		operators.map((op) => expect(screen.getByText(op)).toBeInTheDocument())
+		numbers.map((number) =>
+			expect(screen.getByText(number)).toBeInTheDocument(),
 		)
 	})
 
-	test("shows empty state", () => {
+	it("Test error message and backspace key press", async () => {
 		render(<App />)
-		expect(screen.queryByText("You lost! Try again")).toBeNull()
-		// expect(document.querySelectorAll("main div")).toHaveLength(6)
-		expect(document.querySelector("main")?.textContent).toEqual("")
+		const domEl = screen.getByText("MATHLER")
+
+		/**
+		 * Tests a series of number that are NOT equal to the solution
+		 */
+		const randomNums = ["1", "0", "3", "7", "4", "6"]
+		randomNums.map(async (key, i) => {
+			fireEvent.keyDown(domEl, { key, code: key, charCode: key.charCodeAt(0) })
+			const numberDiv = screen.getByTestId(`number-box-0-${i}`)
+			expect(numberDiv.textContent).toEqual(key)
+		})
+		fireEvent.keyDown(domEl, { key: "Enter" })
+
+		expect(await screen.getByTestId("error-msg").textContent).toEqual(
+			"Your guess is not equal to 76",
+		)
+
+		/**
+		 * Hit Backspace all the way back to the 1st cell
+		 */
+		const backspaceArray = new Array(CALC_LENGTH).fill("backspace")
+		backspaceArray.map(async (key, i) => {
+			fireEvent.keyDown(domEl, { key, code: key, charCode: key.charCodeAt(0) })
+			const numberDiv = await screen.getByTestId(`number-box-0-${i}`)
+			expect(numberDiv.textContent).toEqual(" ")
+		})
 	})
 
-	// test("shows won game over state",  () => {
-	// 	await render(<App />)
-
-	// 	expect(screen.getByText("You Won!")).toBeInTheDocument()
-	// })
-
-	test("Controls to be present", () => {
+	it("Test correct solution with misplaced numbers", async () => {
 		render(<App />)
+		const domEl = screen.getByText("MATHLER")
 
-		waitFor(() => expect(screen.queryByText("enter")).toBeInTheDocument())
-		waitFor(() => expect(screen.queryByText("delete")).toBeInTheDocument())
+		/**
+		 * Tests misplaced numbers . Will check "*" is misplaced
+		 */
+		const misplacedNums = ["1", "1", "*", "7", "-", "1"]
+		misplacedNums.map(async (key, i) => {
+			fireEvent.keyDown(domEl, { key, code: key, charCode: key.charCodeAt(0) })
+			const numberDiv = screen.getByTestId(`number-box-0-${i}`)
+			expect(numberDiv.textContent).toEqual(key)
+		})
+		fireEvent.keyDown(domEl, { key: "Enter" })
+
+		const numberDiv = screen.getByTestId(`number-box-0-2`)
+		expect(numberDiv.classList.contains("bg-yellow-500")).toBe(true)
 	})
 
-	// it("key press adds value to first tile", () => {
-	// 	render(<App />)
+	it("Test error message bad math calculation", async () => {
+		render(<App />)
+		const domEl = screen.getByText("MATHLER")
 
-	// 	const numbersContainer = screen.getAllByRole("gamecontrol")
-	// 	console.log(numbersContainer)
-	// 	// fireEvent.click(buttons[0])
-	// 	waitFor(() =>
-	// 		fireEvent.keyDown(screen.getByText(76), {
-	// 			key: "1",
-	// 			code: "1",
-	// 			charCode: 49,
-	// 		}),
-	// 	)
+		/**
+		 * Tests bad math calculation
+		 */
+		const badMath = ["1", "0", "3", "7", "-", "*"]
+		badMath.map(async (key, i) => {
+			fireEvent.keyDown(domEl, { key, code: key, charCode: key.charCodeAt(0) })
+			const numberDiv = screen.getByTestId(`number-box-0-${i}`)
+			expect(numberDiv.textContent).toEqual(key)
+		})
+		fireEvent.keyDown(domEl, { key: "Enter" })
 
-	// 	waitFor(() => expect(screen.queryByText("1")).toBeInTheDocument())
-	// })
+		expect(await screen.getByTestId("error-msg").textContent).toEqual(
+			"Your guess is not equal to 76",
+		)
 
-	test("able to see instructions modal", async () => {
+		/**
+		 * Hit Backspace all the way back to the 1st cell
+		 */
+		const backspaceArray = new Array(CALC_LENGTH).fill("backspace")
+		backspaceArray.map(async (key, i) => {
+			fireEvent.keyDown(domEl, { key, code: key, charCode: key.charCodeAt(0) })
+			const numberDiv = await screen.getByTestId(`number-box-0-${i}`)
+			expect(numberDiv.textContent).toEqual(" ")
+		})
+	})
+
+	it("Shows winning state", async () => {
+		// Audio play() function
+		HTMLMediaElement.prototype.play = () => Promise.resolve()
+
+		render(<App />)
+		const domEl = screen.getByText("MATHLER")
+
+		/**
+		 * Winning solution
+		 */
+		const winningNums = ["1", "+", "5", "*", "1", "5"]
+		winningNums.map(async (key, i) => {
+			fireEvent.keyDown(domEl, { key, code: key, charCode: key.charCodeAt(0) })
+			const numberDiv = await screen.getByTestId(`number-box-0-${i}`)
+			expect(numberDiv.textContent).toEqual(key)
+		})
+		fireEvent.keyDown(domEl, { key: "Enter" })
+
+		expect(await screen.getByTestId("win-msg").textContent).toEqual(
+			"🙌🏼 Congrats! You Won! 🙌🏼",
+		)
+	})
+
+	it("Shows winning with commutative solution", async () => {
+		render(<App />)
+		const domEl = screen.getByText("MATHLER")
+
+		/**
+		 * Winning commutative solutions are accepted
+		 * [1 + 5 * 1 5] => [5 * 1 5 + 1]
+		 */
+		const winningNums = ["5", "*", "1", "5", "+", "1"]
+		winningNums.map(async (key, i) => {
+			fireEvent.keyDown(domEl, { key, code: key, charCode: key.charCodeAt(0) })
+			const numberDiv = await screen.getByTestId(`number-box-0-${i}`)
+			expect(numberDiv.textContent).toEqual(key)
+		})
+		fireEvent.keyDown(domEl, { key: "Enter" })
+
+		expect(await screen.getByTestId("win-msg").textContent).toEqual(
+			"🙌🏼 Congrats! You Won! 🙌🏼",
+		)
+	})
+
+	it("Shows lost state", async () => {
+		render(<App />)
+		const domEl = screen.getByText("MATHLER")
+
+		/**
+		 * Fill board with all wrong calculation but with the right solution
+		 */
+		const num_guesses = new Array(NUM_GUESSES).fill(null)
+		num_guesses.map((_, row) => {
+			const wrongCalcNums = ["1", "1", "*", "7", "-", "1"]
+			wrongCalcNums.map(async (key, i) => {
+				fireEvent.keyDown(domEl, {
+					key,
+					code: key,
+					charCode: key.charCodeAt(0),
+				})
+				const numberDiv = await screen.getByTestId(`number-box-${row}-${i}`)
+				expect(numberDiv.textContent).toEqual(key)
+			})
+			fireEvent.keyDown(domEl, { key: "Enter" })
+		})
+
+		// Check the last cell of last row is set
+		expect(await screen.getByTestId("number-box-5-5").textContent).toEqual("1")
+
+		// Check lost err msg
+		expect(await screen.getByTestId("error-msg").textContent).toEqual(
+			`The solution was 1+5*15`,
+		)
+	})
+
+	it("able to see instructions modal", async () => {
 		render(<App />)
 		const button = await screen.findByRole("button", {
 			name: /Show game rules/i,
 		})
 		fireEvent.click(button)
-		// waitFor(() => expect(userEvent.click(screen.queryByText("Show game rules")))
 		expect(screen.getByText("How to play Mathler")).toBeInTheDocument()
 	})
 
-	// test("able to close instructions modal", async () => {
-	// 	render(<App />)
-	// 	const buttonOpen = await screen.findByRole("button", {
-	// 		name: /Show game rules/i,
-	// 	})
-	// 	const buttonClose = await screen.findByRole("button", {
-	// 		name: /Close/i,
-	// 	})
-	// 	fireEvent.click(buttonOpen)
-	// 	fireEvent.click(buttonClose)
-	// 	expect(screen.queryByText("How to play Mathler")).toBeNull()
-	// })
-
-	test("renders correctly with required props", () => {
+	it("ControlButton renders correctly with required props", () => {
 		render(<ControlButton text="Click me" />)
 		const button = screen.getByRole("button", { name: "Click me" })
 		expect(button).toBeInTheDocument()
-		expect(button).toHaveClass("bg-slate-200 hover:bg-slate-300")
+		expect(button).toHaveClass("hover:bg-slate-300")
 	})
 
-	test("calls handleControlClick on click", () => {
-		// const mockHandleControlClick = vi.fn()
-
-		// vi.mocked(useGame).mockReturnValue({
-		// 	state: {
-		// 		currentTileValue: "Click me",
-		// 	},
-		// })
-
+	it("ControlButton calls handleControlClick on click", () => {
 		render(<ControlButton text="Click me" />)
 		const button = screen.getByRole("button", { name: "Click me" })
 		fireEvent.click(button)
-		// expect(mockHandleControlClick).toHaveBeenCalledTimes(1)
 	})
 
-	test("applies additional className if provided", () => {
+	it("ControlButton applies additional className if provided", () => {
 		render(<ControlButton text="Click me" className="text-xl" />)
 		const button = screen.getByRole("button", { name: "Click me" })
 		expect(button).toHaveClass("text-xl")

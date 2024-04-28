@@ -15,8 +15,8 @@
 		"build": "react-scripts build",
 		"eject": "react-scripts eject",
 		"test": "vitest",
-		"coverage": "vitest run --coverage",
-		"lint": "eslint . --ext ts,tsx ",
+		"coverage": "vitest run --coverage --coverage.exclude='**/build/**' --coverage.exclude='**/*.config.js/**' --coverage.exclude='**/index.tsx/**' --coverage.exclude='**/reportWebVitals.ts/**'",
+		"lint": "eslint . --ext ts,tsx",
 		"format": "prettier --write ."
 	},
 	"eslintConfig": {

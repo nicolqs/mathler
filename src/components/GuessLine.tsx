@@ -4,9 +4,10 @@ import { getCellStyle } from "../utils"
 
 interface GuessLineProps {
 	guess: string
-	calculation: string | null
+	calculation: string
 	isFinal: boolean
 	isWinningRow: boolean
+	row: number
 }
 
 const GuessLine: React.FC<GuessLineProps> = ({
@@ -14,26 +15,25 @@ const GuessLine: React.FC<GuessLineProps> = ({
 	calculation,
 	isFinal,
 	isWinningRow,
+	row,
 }) => {
-	if (!calculation) return null
+	const winingRowStyle =
+		"border-green-500 transition-border ease-linear duration-900 border-2 rounded animate-pulse p-2"
+	const animationStyle =
+		"transition ease-in border-black animate-[wiggle_1s_ease-in-out_infinite] border-sky-400"
 
 	return (
 		<div
 			className={twMerge(
 				"flex justify-center gap-1 ",
-				isWinningRow
-					? "border-green-500 transition-border ease-linear duration-900 border-2 rounded animate-pulse p-2"
-					: 0,
+				isWinningRow ? winingRowStyle : "",
 			)}
 		>
 			{guess.split("").map((char: string, i: number) => {
 				const cellStyle = isFinal
 					? getCellStyle(char, i, calculation, isWinningRow)
 					: ""
-				const animationClass =
-					char !== " " && !isFinal
-						? "transition ease-in border-black animate-[wiggle_1s_ease-in-out_infinite] border-sky-400"
-						: ""
+				const animationClass = char !== " " && !isFinal ? animationStyle : ""
 
 				return (
 					<div
@@ -43,6 +43,7 @@ const GuessLine: React.FC<GuessLineProps> = ({
 							cellStyle,
 							animationClass,
 						)}
+						data-testid={`number-box-${row}-${i}`}
 					>
 						{char}
 					</div>

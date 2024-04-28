@@ -32,3 +32,7 @@ pnpm coverage
 ## Screenshot
 
 ![Mathler](./public/mathler.png)
+
+## Code Coverage
+
+![Code Coverage](./public/coverage.png)

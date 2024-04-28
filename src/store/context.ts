@@ -8,6 +8,7 @@ export interface StateType {
 	calculation: string | null
 	hasWon: boolean
 	currentTileValue: string
+	controlButtonStatuses: Map<string, string>
 }
 
 export type ActionType =
@@ -17,6 +18,7 @@ export type ActionType =
 	| { type: "setCalculation"; value: string }
 	| { type: "setHasWon"; value: boolean }
 	| { type: "setCurrentTileValue"; value: string }
+	| { type: "setControlButtonStatuses"; value: Map<string, string> }
 
 export const initState: StateType = {
 	guesses: Array(NUM_GUESSES).fill(""),
@@ -25,6 +27,7 @@ export const initState: StateType = {
 	calculation: null,
 	hasWon: false,
 	currentTileValue: "",
+	controlButtonStatuses: new Map<string, string>(),
 }
 
 export const GameContext = createContext<{

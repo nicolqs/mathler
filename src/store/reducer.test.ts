@@ -110,4 +110,24 @@ describe("useReducer for game state management", () => {
 		// Expect the currentTileValue to be updated to the new value
 		expect(updatedState.currentTileValue).toEqual(currentTileValue)
 	})
+
+	it("updates controlButtonStatuses correctly when dispatching setControlButtonStatuses", () => {
+		const controlButtonStatuses = new Map<string, string>([["1", "correct"]])
+		const { result } = renderHook(() => useReducer(gameReducer, initState))
+		const [_, dispatch] = result.current
+
+		// Dispatch an action to update controlButtonStatuses
+		act(() => {
+			dispatch({
+				type: "setControlButtonStatuses",
+				value: controlButtonStatuses,
+			})
+		})
+
+		// Re-check the destructured state after the update
+		const [updatedState] = result.current
+
+		// Expect the controlButtonStatuses to be updated to the new value
+		expect(updatedState.controlButtonStatuses).toEqual(controlButtonStatuses)
+	})
 })

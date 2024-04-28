@@ -32,7 +32,10 @@ export const gameReducer = (state: StateType, action: ActionType) => {
 				...state,
 				currentTileValue: action.value,
 			}
-		default:
-			return state
+		case "setControlButtonStatuses":
+			return {
+				...state,
+				controlButtonStatuses: action.value,
+			}
 	}
 }

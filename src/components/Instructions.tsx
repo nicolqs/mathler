@@ -9,7 +9,7 @@ const Instructions: React.FC = () => {
 			<button
 				type="button"
 				onClick={() => setShowModal(true)}
-				className="text-white bg-gradient-to-r from-green-400 via-green-500 to-emerald-600 hover:bg-gradient-to-br  font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2 w-64 mt-14"
+				className="text-white bg-gradient-to-r from-green-400 via-green-500 to-emerald-600 hover:bg-gradient-to-br  font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2 w-64 mt-10"
 			>
 				Show game rules
 			</button>
@@ -59,13 +59,33 @@ const Instructions: React.FC = () => {
 											calculation={"1+5*35"}
 											isFinal
 											isWinningRow={false}
+											row={0}
 										/>
+										<p className="font-bold mt-2 md:mt-4">Additional rules:</p>
+										<ul className="list-disc ml-5 mb-5">
+											<li>Numbers and operators can appear multiple times.</li>
+											<li>
+												Calculate / or * before - or + (order of operations).
+											</li>
+											<li>
+												Commutative solutions are accepted, for example 20+7+3
+												and 3+7+20.
+											</li>
+											<li>
+												Commutative solutions will be automatically rearranged
+												to the exact solution
+											</li>
+											<p className="font-bold mt-2 md:mt-4">
+												An example of a winning game of 76
+											</p>
+										</ul>
 									</div>
 									<div className="flex items-center justify-end pt-5 border-t border-solid border-blueGray-200 rounded-b">
 										<button
 											className="text-white bg-gradient-to-r from-green-400 via-green-500 to-emerald-600 hover:bg-gradient-to-br rounded font-bold uppercase px-6 py-2 text-md outline-none focus:outline-none mr-1 mb-1 ease-linear transition-all duration-150"
 											type="button"
 											onClick={() => setShowModal(false)}
+											data-testid={"close-modal"}
 										>
 											Close
 										</button>

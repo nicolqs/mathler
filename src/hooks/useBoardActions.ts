@@ -1,18 +1,32 @@
 import { evaluate } from "mathjs"
+import sound from "../assets/sound.wav"
 import { useGame } from "../store/context"
-import { CALC_LENGTH, areArraysEqual, isNumberOrOperator } from "../utils"
+import {
+	CALC_LENGTH,
+	Status,
+	areArraysEqual,
+	isNumberOrOperator,
+} from "../utils"
 
 function useBoardActions() {
 	const { state, dispatch } = useGame()
-	const { guesses, currentGuess, solution, calculation, currentTileValue } =
-		state
+	const {
+		guesses,
+		currentGuess,
+		solution,
+		calculation,
+		currentTileValue,
+		controlButtonStatuses,
+	} = state
 
-	const processEnterKey = () => {
-		if (currentGuess.length !== CALC_LENGTH) return
+	const processEnterKey = (): boolean | null => {
+		if (currentGuess.length !== CALC_LENGTH) return null
 
 		// Evaluate the actual current guess calculation
-		const result = evaluate(currentGuess)
-		if (result !== solution) {
+		try {
+			const result = evaluate(currentGuess)
+			if (result !== solution) return false
+		} catch {
 			return false
 		}
 
@@ -28,19 +42,23 @@ function useBoardActions() {
 		const curGuessMatches = currentGuess.match(regex) ?? []
 
 		// If user entered the correct & exact calculation
-		// Also works when user entered a valid sequence but in different order
+		// Commutative solutions are accepted:
 		// eg.: 1+5*15 === 15*5+1
 		if (
 			calculation === currentGuess ||
 			areArraysEqual(calcMatches.sort(), curGuessMatches.sort())
 		) {
 			dispatch({ type: "setHasWon", value: true })
-			if (calculation !== currentGuess) {
-				dispatch({ type: "setCalculation", value: currentGuess })
-			}
+
+			// Play winning sound!
+			playWinSound()
 		}
 
 		updateGuesses()
+	}
+
+	const playWinSound = () => {
+		new Audio(sound).play()
 	}
 
 	const updateGuesses = () => {
@@ -51,6 +69,24 @@ function useBoardActions() {
 		guessesClone[index] = currentGuess
 		dispatch({ type: "setGuesses", value: guessesClone })
 		dispatch({ type: "setCurrentGuess", value: "" })
+
+		updateControlButtonStatuses()
+	}
+
+	const updateControlButtonStatuses = () => {
+		currentGuess.split("").map((char, i) => {
+			console.log(char)
+			if (!calculation?.includes(char)) {
+				controlButtonStatuses.set(char, Status.Incorrect)
+				return
+			}
+
+			// Don't update a correct button
+			if (controlButtonStatuses.get(char) === Status.Correct) return
+
+			const status = calculation[i] === char ? Status.Correct : Status.Misplaced
+			controlButtonStatuses.set(char, status)
+		})
 	}
 
 	const appendValueIfNeeded = () => {
