@@ -5,13 +5,7 @@ import puzzles from "../data/puzzles"
 import useBoardActions from "../hooks/useBoardActions"
 import { useGame } from "../store/context"
 import { NUM_GUESSES, getGuess, isValidTileValue } from "../utils"
-import Controls from "./Controls"
 import GuessLine from "./GuessLine"
-
-export interface Puzzle {
-	solution: number
-	calculation: string
-}
 
 const Board: React.FC = () => {
 	const { state, dispatch } = useGame()
@@ -25,7 +19,6 @@ const Board: React.FC = () => {
 		currentTileValue,
 	} = state
 
-	const [showTransition, setShowTransition] = useState<boolean>(false)
 	const [errorMsg, setErrorMsg] = useState<string>("")
 
 	// Pick the daily Puzzle
@@ -33,8 +26,6 @@ const Board: React.FC = () => {
 		const dailyPuzzle = puzzles[0] //Math.floor(Math.random() * puzzles.length)]
 		dispatch({ type: "setSolution", value: dailyPuzzle.solution })
 		dispatch({ type: "setCalculation", value: dailyPuzzle.calculation })
-
-		setTimeout(() => setShowTransition(true), 800)
 	}, [dispatch])
 
 	/**
@@ -66,7 +57,11 @@ const Board: React.FC = () => {
 	}, [currentTileValue, currentGuess, dispatch])
 
 	/**
-	 *
+	 * Main game logic. It manages the game lifecycle:
+	 * - Win
+	 * - Loss
+	 * - Wrong guess
+	 * - Any new game action (via keyboard or button)
 	 */
 	useEffect(() => {
 		if (calculation === null) return
@@ -83,16 +78,18 @@ const Board: React.FC = () => {
 		}
 
 		if (currentTileValue === "enter") {
+			// Process game on Enter key
 			const currentGuessStatus = processEnterKey()
 			if (!currentGuessStatus) {
 				setErrorMsg(`Your guess is not equal to ${solution}`)
 			}
 		} else {
 			// Appends value if it's a valid character and under length limit
-			appendValueIfNeeded(currentTileValue, currentGuess)
+			appendValueIfNeeded()
 		}
 
-		dispatch({ type: "setCurrentTileValue", value: "" })
+		if (currentTileValue !== "")
+			dispatch({ type: "setCurrentTileValue", value: "" })
 	}, [
 		guesses,
 		solution,
@@ -111,14 +108,17 @@ const Board: React.FC = () => {
 	return (
 		<div className="flex flex-col items-center gap-1">
 			<div className="">Find the hidden calculation that equals</div>
+			<div className="text-3xl animate-pulse font-extrabold text-transparent bg-clip-text bg-gradient-to-r to-emerald-600 from-sky-400 mb-3">
+				{solution}
+			</div>
 			<Transition
-				show={showTransition}
-				enter="transition-opacity duration-300"
-				enterFrom="opacity-0"
-				enterTo="opacity-100"
+				show={hasWon}
+				enter="ease-out duration-[2000ms]"
+				enterFrom="opacity-0 scale-90"
+				enterTo="opacity-100 scale-100"
 			>
-				<div className="text-3xl animate-pulse font-extrabold text-transparent bg-clip-text bg-gradient-to-r to-emerald-600 from-sky-400 mb-3">
-					{solution}
+				<div className="text-green-600 font-bold text-2xl mb-4">
+					🙌🏼 Congrats! You Won! 🙌🏼
 				</div>
 			</Transition>
 			{guesses.map((guess, i) => {
@@ -128,7 +128,7 @@ const Board: React.FC = () => {
 						guess={getGuess(guess, i, currentGuessIndex, currentGuess)}
 						calculation={calculation}
 						isFinal={currentGuessIndex > i || currentGuessIndex === -1}
-						winningRow={i === currentGuessIndex - 1 && hasWon}
+						isWinningRow={i === currentGuessIndex - 1 && hasWon}
 					/>
 				)
 			})}
@@ -140,7 +140,6 @@ const Board: React.FC = () => {
 			>
 				{errorMsg}
 			</div>
-			<Controls />
 		</div>
 	)
 }

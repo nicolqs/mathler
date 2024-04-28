@@ -2,6 +2,32 @@
   font-family: 'Plus Jakarta Sans', sans-serif;
 }
 
-.preserve-3d {
-  transform-style: preserve-3d;
+.fade-in-scale {
+  opacity: 0;
+  transform: scale(0.9);
+  visibility: hidden;
+}
+
+.title-fade-in {
+  animation: fadeInScale 0.5s ease-out forwards;
+  animation-delay: 0.3s;
+}
+
+.game-fade-in {
+  animation: fadeInScale 1.2s ease-out forwards;
+  animation-delay: 0.8s;
+}
+
+/* Keyframes for the animation */
+@keyframes fadeInScale {
+  0% {
+    opacity: 0;
+    transform: scale(0.9);
+    visibility: hidden;
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+    visibility: visible;
+  }
 }

@@ -4,11 +4,13 @@ import { CALC_LENGTH, areArraysEqual, isNumberOrOperator } from "../utils"
 
 function useBoardActions() {
 	const { state, dispatch } = useGame()
-	const { guesses, currentGuess, solution, calculation } = state
+	const { guesses, currentGuess, solution, calculation, currentTileValue } =
+		state
 
-	function processEnterKey() {
+	const processEnterKey = () => {
 		if (currentGuess.length !== CALC_LENGTH) return
 
+		// Evaluate the actual current guess calculation
 		const result = evaluate(currentGuess)
 		if (result !== solution) {
 			return false
@@ -18,7 +20,7 @@ function useBoardActions() {
 		return true
 	}
 
-	function updateGameStatus() {
+	const updateGameStatus = () => {
 		if (calculation === null || solution === null) return
 
 		const regex = /\d+|\+|\*|\//g
@@ -38,10 +40,10 @@ function useBoardActions() {
 			}
 		}
 
-		updateGuesses(currentGuess, guesses)
+		updateGuesses()
 	}
 
-	function updateGuesses(currentGuess: string, guesses: string[]) {
+	const updateGuesses = () => {
 		const index = guesses.findIndex((guess) => guess === "")
 		if (index === -1) return // Return if no empty guess found
 
@@ -51,7 +53,7 @@ function useBoardActions() {
 		dispatch({ type: "setCurrentGuess", value: "" })
 	}
 
-	function appendValueIfNeeded(currentTileValue: string, currentGuess: string) {
+	const appendValueIfNeeded = () => {
 		if (
 			currentGuess.length < CALC_LENGTH &&
 			isNumberOrOperator(currentTileValue.charCodeAt(0))

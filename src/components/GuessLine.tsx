@@ -6,14 +6,14 @@ interface GuessLineProps {
 	guess: string
 	calculation: string | null
 	isFinal: boolean
-	winningRow: boolean
+	isWinningRow: boolean
 }
 
 const GuessLine: React.FC<GuessLineProps> = ({
 	guess,
 	calculation,
 	isFinal,
-	winningRow,
+	isWinningRow,
 }) => {
 	if (!calculation) return null
 
@@ -21,26 +21,27 @@ const GuessLine: React.FC<GuessLineProps> = ({
 		<div
 			className={twMerge(
 				"flex justify-center gap-1 ",
-				winningRow
+				isWinningRow
 					? "border-green-500 transition-border ease-linear duration-900 border-2 rounded animate-pulse p-2"
 					: 0,
 			)}
 		>
 			{guess.split("").map((char: string, i: number) => {
-				let cellStyle = isFinal
-					? getCellStyle(char, i, calculation, winningRow)
+				const cellStyle = isFinal
+					? getCellStyle(char, i, calculation, isWinningRow)
 					: ""
-				let animate =
+				const animationClass =
 					char !== " " && !isFinal
 						? "transition ease-in border-black animate-[wiggle_1s_ease-in-out_infinite] border-sky-400"
 						: ""
+
 				return (
 					<div
 						key={i}
 						className={twMerge(
 							"w-14 h-14 border-solid border-2 flex items-center justify-center font-bold rounded",
 							cellStyle,
-							animate,
+							animationClass,
 						)}
 					>
 						{char}

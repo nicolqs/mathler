@@ -1,4 +1,7 @@
-import { Puzzle } from "../components/Board"
+export interface Puzzle {
+	solution: number
+	calculation: string
+}
 
 const puzzles: Puzzle[] = [
 	{ solution: 76, calculation: "1+5*15" },
