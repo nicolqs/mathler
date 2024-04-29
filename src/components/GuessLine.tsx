@@ -10,13 +10,13 @@ interface GuessLineProps {
 	row: number
 }
 
-const GuessLine: React.FC<GuessLineProps> = ({
+function GuessLine({
 	guess,
 	calculation,
 	isFinal,
 	isWinningRow,
 	row,
-}) => {
+}: GuessLineProps) {
 	const winingRowStyle =
 		"border-green-500 transition-border ease-linear duration-900 border-2 rounded animate-pulse p-2"
 	const animationStyle =
@@ -39,7 +39,7 @@ const GuessLine: React.FC<GuessLineProps> = ({
 					<div
 						key={i}
 						className={twMerge(
-							"w-14 h-14 border-solid border-2 flex items-center justify-center font-bold rounded",
+							"w-12 h-12  border-solid border-2 flex items-center justify-center font-bold rounded",
 							cellStyle,
 							animationClass,
 						)}

@@ -1,7 +1,7 @@
 import { useState } from "react"
 import GuessLine from "./GuessLine"
 
-const Instructions: React.FC = () => {
+function Instructions() {
 	const [showModal, setShowModal] = useState<boolean>(false)
 
 	return (
@@ -27,7 +27,7 @@ const Instructions: React.FC = () => {
 											×
 										</span>
 									</button>
-									<div className="my-4 text-blueGray-500 text-md md:text-lg leading-relaxed">
+									<div className="my-4 text-blueGray-500 text-sm md:text-lg leading-relaxed">
 										<h2 className="font-bold text-2xl mb-2 pb-2 mx-auto border-b border-solid border-blueGray-200">
 											How to play Mathler
 										</h2>
@@ -75,9 +75,6 @@ const Instructions: React.FC = () => {
 												Commutative solutions will be automatically rearranged
 												to the exact solution
 											</li>
-											<p className="font-bold mt-2 md:mt-4">
-												An example of a winning game of 76
-											</p>
 										</ul>
 									</div>
 									<div className="flex items-center justify-end pt-5 border-t border-solid border-blueGray-200 rounded-b">

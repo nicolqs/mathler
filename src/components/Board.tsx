@@ -1,5 +1,5 @@
 import { Transition } from "@tailwindui/react"
-import React, { useEffect, useState } from "react"
+import { useEffect, useState } from "react"
 import { twMerge } from "tailwind-merge"
 import puzzles from "../data/puzzles"
 import useBoardActions from "../hooks/useBoardActions"
@@ -7,7 +7,7 @@ import { useGame } from "../store/context"
 import { NUM_GUESSES, getGuess, isValidTileValue } from "../utils"
 import GuessLine from "./GuessLine"
 
-const Board: React.FC = () => {
+function Board() {
 	const { state, dispatch } = useGame()
 	const { appendValueIfNeeded, processEnterKey } = useBoardActions()
 	const {

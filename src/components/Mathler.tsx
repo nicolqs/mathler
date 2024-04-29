@@ -5,7 +5,7 @@ import Board from "./Board"
 import Controls from "./Controls"
 import Instructions from "./Instructions"
 
-const Mathler: React.FC = () => {
+function Mathler() {
 	const [state, dispatch] = useReducer(gameReducer, initState)
 	// eslint-disable-next-line
 	const [showGame, setShowGame] = useState<boolean>(false)
@@ -22,7 +22,7 @@ const Mathler: React.FC = () => {
 						MATHLER
 					</h1>
 				</header>
-				<div className="flex flex-col items-center gap-3 fade-in-scale game-fade-in">
+				<div className="flex flex-col items-center gap-5 fade-in-scale game-fade-in">
 					<Board />
 					<Controls />
 				</div>

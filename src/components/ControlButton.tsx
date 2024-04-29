@@ -7,7 +7,7 @@ interface ControlButtonProps {
 	className?: string
 }
 
-const ControlButton: React.FC<ControlButtonProps> = ({ text, className }) => {
+function ControlButton({ text, className }: ControlButtonProps) {
 	const { state, dispatch } = useGame()
 
 	// Mouse event handler for game button click

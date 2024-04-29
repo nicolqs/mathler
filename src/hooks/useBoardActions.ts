@@ -49,6 +49,9 @@ function useBoardActions() {
 			areArraysEqual(calcMatches.sort(), curGuessMatches.sort())
 		) {
 			dispatch({ type: "setHasWon", value: true })
+			if (calculation !== currentGuess) {
+				dispatch({ type: "setCalculation", value: currentGuess })
+			}
 
 			// Play winning sound!
 			playWinSound()
@@ -75,17 +78,17 @@ function useBoardActions() {
 
 	const updateControlButtonStatuses = () => {
 		currentGuess.split("").map((char, i) => {
-			console.log(char)
 			if (!calculation?.includes(char)) {
 				controlButtonStatuses.set(char, Status.Incorrect)
-				return
+				return null
 			}
 
 			// Don't update a correct button
-			if (controlButtonStatuses.get(char) === Status.Correct) return
+			if (controlButtonStatuses.get(char) === Status.Correct) return null
 
 			const status = calculation[i] === char ? Status.Correct : Status.Misplaced
 			controlButtonStatuses.set(char, status)
+			return null
 		})
 	}
 
